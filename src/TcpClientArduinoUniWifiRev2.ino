@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <BME280.h>
-#define DELAYTIME 1000
+#define DELAYTIME 400
 char ssid[] = "TANASE";                         //  your network SSID (name)
 char pass[] = "3629678427"; // your network password
 
@@ -255,28 +255,28 @@ void loop()
     delay(DELAYTIME);
   }
   tempData = ReadBME280TempData();
-  TcpStringData="E" +String(tempData)+"0.00";
-  client.println(TcpStringData);
+  TcpStringData="E" +String(tempData);//+".00";
+    client.println(TcpStringData);
   delay(DELAYTIME);
 
-  humidityData = ReadBME280HumidityData()+"0.00";
-  TcpStringData="U" +String(humidityData)+"0.00";
-  client.println(TcpStringData);
+  humidityData = ReadBME280HumidityData();//+".00";
+  TcpStringData="U" +String(humidityData);//+".00";
+  client.println(TcpStringData+"  ");
   delay(DELAYTIME);
 
   ReadAllHumidityCompRegister();
   ReadDigT1TempCompRegister();
   ReadAllTempCompRegister();
   // use serial port console to see what is printed
-  TcpStringData="T1" +String(dig_T1)+"0.00";
+  TcpStringData="T1" +String(dig_T1)+".00";
   client.println(TcpStringData);
   delay(DELAYTIME);
 
-  TcpStringData="T2" +String(dig_T2)+"0.00";
+  TcpStringData="T2" +String(dig_T2)+".00";
   client.println(TcpStringData);
   delay(DELAYTIME);
 
-  TcpStringData="T3" +String(dig_T3)+"0.00";
+  TcpStringData="T3" +String(dig_T3)+".00";
   client.println(TcpStringData);
   delay(DELAYTIME);
   // Send the Humidity Data and its compensation the the SerialPort
@@ -284,30 +284,28 @@ void loop()
   // https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf
   // unsigned char dig_H1,dig_H3;
   // signed short dig_H2,dig_H4,dig_H5;
-  TcpStringData="H1" +String(dig_H1)+"0.00";
+  TcpStringData="H1" +String(dig_H1);".00";
   client.println(TcpStringData);
   delay(DELAYTIME);
 
-  TcpStringData="H2" +String(dig_H2)+"0.00";
-  client.println(TcpStringData);
-
-  delay(DELAYTIME);
-
-  TcpStringData="H3" +String(dig_H3)+"0.00";
+  TcpStringData="H2" +String(dig_H2)+".00";
   client.println(TcpStringData);
   delay(DELAYTIME);
 
+  TcpStringData="H3" +String((unsigned short)dig_H3);//+".00";
+  client.println(TcpStringData);
+  delay(DELAYTIME);
 
-  TcpStringData="H4" +String(dig_H4)+"0.00";
+  TcpStringData="H4" +String(dig_H4)+".00";
   client.println(TcpStringData);
   delay(DELAYTIME);
 
 
-  TcpStringData="H5" +String(dig_H5)+"0.00";
+  TcpStringData="H5" +String(dig_H5)+".00";
   client.println(TcpStringData);
   delay(DELAYTIME);
 
-  TcpStringData="H6"+String(dig_H6)+"0.00";
+  TcpStringData="H6"+String((float)dig_H6);
   client.println(TcpStringData);
   delay(DELAYTIME);
 
