@@ -261,7 +261,7 @@ void loop()
 
   humidityData = ReadBME280HumidityData();//+".00";
   TcpStringData="U" +String(humidityData);//+".00";
-  client.println(TcpStringData+"  ");
+  client.println(TcpStringData);
   delay(DELAYTIME);
 
   ReadAllHumidityCompRegister();
