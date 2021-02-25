@@ -250,7 +250,7 @@ void loop()
   for (i = 0; i < 6; i++)
   {
     voltageAtAdcPin = (float)analogRead(analogPin[i]) / 1024 * 5; // read the input pin
-    TcpStringData=String(i + 1)+String(voltageAtAdcPin);
+    TcpStringData=String(i + 1)+String(voltageAtAdcPin,4);
     client.println(TcpStringData);
     client.flush();
 
