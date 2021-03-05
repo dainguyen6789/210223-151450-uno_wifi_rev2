@@ -44,6 +44,7 @@ signed short dig_T2, dig_T3;
 unsigned char dig_H1, dig_H3;
 signed short dig_H2, dig_H4, dig_H5;
 char dig_H6;
+String  TcpStringData;
 
 void SetupTCP()
 {
@@ -233,6 +234,7 @@ void ReadDigT1TempCompRegister()
   dataHi = ReadCompRegister(DIG_T1_HI_REGISTER_ADDRESS);
   dig_T1 = (dataHi << 8) | dataLo;
 }
+
 void ReadAllTempCompRegister()
 {
   int16_t dataHi, dataLo;
@@ -256,10 +258,73 @@ void setup()
   ConfigAnalogPins();
   InitBme280I2c();
   SetupTCP();
+  SendCompensationData();
 }
-voi SendCompensationT1()
+void SendCompensationT1()
 {
   TcpStringData="T1" +String(dig_T1)+".00";
+  client.println(TcpStringData);
+  client.flush();
+  delay(DELAYTIME);
+}
+void SendCompensationT2()
+{
+  TcpStringData="T2" +String(dig_T2)+".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+}
+void SendCompensationT3()
+{
+  TcpStringData="T3" +String(dig_T3)+".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+}
+void SendCompensationH1()
+{
+  TcpStringData="H1" +String(dig_H1);".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+}
+void SendCompensationH2()
+{
+  TcpStringData="H2" +String(dig_H2)+".00";
+  client.println(TcpStringData);
+  client.flush();
+  delay(DELAYTIME);
+}
+void SendCompensationH3()
+{
+  TcpStringData="H3" +String((unsigned short)dig_H3);//+".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+}
+void SendCompensationH4()
+{
+  TcpStringData="H4" +String(dig_H4)+".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+}
+void SendCompensationH5()
+{
+  TcpStringData="H5" +String(dig_H5)+".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+}
+void SendCompensationH6()
+{
+  TcpStringData="H6"+String((float)dig_H6);
   client.println(TcpStringData);
   client.flush();
   delay(DELAYTIME);
@@ -269,94 +334,53 @@ void SendCompensationData()
   ReadAllHumidityCompRegister();
   ReadDigT1TempCompRegister();
   ReadAllTempCompRegister();
+
   // use serial port console to see what is printed
-  SendCompensationT1();
-  
-  delay(DELAYTIME);
-
-  TcpStringData="T2" +String(dig_T2)+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-
-  TcpStringData="T3" +String(dig_T3)+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
   // Send the Humidity Data and its compensation the the SerialPort
   // Compensation algorithm, Page 26:
   // https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf
   // unsigned char dig_H1,dig_H3;
-  // signed short dig_H2,dig_H4,dig_H5;
-  TcpStringData="H1" +String(dig_H1);".00";
-  client.println(TcpStringData);
-  client.flush();
+  // signed short dig_H2,dig_H4,dig_H5;  
+  SendCompensationT1();
+  SendCompensationT2();
+  SendCompensationT3();
 
-  delay(DELAYTIME);
-
-  TcpStringData="H2" +String(dig_H2)+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-
-  TcpStringData="H3" +String((unsigned short)dig_H3);//+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-
-  TcpStringData="H4" +String(dig_H4)+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-
-
-  TcpStringData="H5" +String(dig_H5)+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-
-  TcpStringData="H6"+String((float)dig_H6);
-  client.println(TcpStringData);
-  client.flush();
-  delay(DELAYTIME);
+  SendCompensationH1();
+  SendCompensationH2();
+  SendCompensationH3();
+  SendCompensationH4();
+  SendCompensationH5();
+  SendCompensationH6();  
 }
 
-void loop()
+void SendADCData()
 {
-  String  TcpStringData;
-  // send the Gas Sensor ADC value to the SerialPort
   for (i = 0; i < 6; i++)
   {
     voltageAtAdcPin = (float)analogRead(analogPin[i]) / 1024 * 5; // read the input pin
     TcpStringData=String(i + 1)+String(voltageAtAdcPin,4);
     client.println(TcpStringData);
     client.flush();
-
     delay(DELAYTIME);
   }
+}
+
+void loop()
+{
+  // send the Gas Sensor ADC value to the SerialPort
+  SendADCData();
   // this is the temparature data
   tempData = ReadBME280TempData();
   TcpStringData="E" +String(tempData);//+".00";
   client.println(TcpStringData);
   client.flush();
-
   delay(DELAYTIME);
-  // 
+  
   humidityData = ReadBME280HumidityData();//+".00";
   TcpStringData="U" +String(humidityData);//+".00";
   client.println(TcpStringData);
   client.flush();
-
   delay(DELAYTIME);
 
-
-
-
-
+  SendCompensationData();
 }
