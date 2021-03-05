@@ -3,12 +3,25 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <BME280.h>
-#define DELAYTIME 800
-char ssid[] = "TANASE";                         //  your network SSID (name)
-char pass[] = "3629678427"; // your network password
+#define DELAYTIME 500
 
+
+#define WIFI_OFFICE
+
+
+#ifdef WIFI_HOME
+char ssid[] = "TANASE";  //"Office"                           //  your network SSID (name)
+char pass[] = "3629678427"; // "erasure hunter mangle hydrated"      your network password
+IPAddress server(192, 168, 2,206); 
+#endif
+
+
+#ifdef WIFI_OFFICE
+char ssid[] = "Office" ;                         //  your network SSID (name)
+char pass[] = "erasure hunter mangle hydrated" ;//     your network password
+IPAddress server(192, 168, 11,166); 
+#endif
 int status = WL_IDLE_STATUS;
-IPAddress server(192, 168, 2, 206); 
 
 // Initialize the client library
 WiFiClient client;
@@ -73,6 +86,8 @@ void InitBme280I2c()
 {
   //Wire.begin(address)
   // address: the 7-bit slave address (optional); if not specified, join the bus as a master.
+  // The Wire library can do at least 50kHz up to 400kHz for a normal Arduino Uno.
+  // The default is 100kHz. A function Wire.setClock set the clock speed.  
   Wire.begin();
   Wire.beginTransmission(BME280Address);                      // transmit to device
   Wire.write(BME280_CTRL_MEAS);                               // sets register pointer to the command register (0x00)
@@ -242,41 +257,20 @@ void setup()
   InitBme280I2c();
   SetupTCP();
 }
-
-void loop()
+voi SendCompensationT1()
 {
-  String  TcpStringData;
-  // send the Gas Sensor ADC value to the SerialPort
-  for (i = 0; i < 6; i++)
-  {
-    voltageAtAdcPin = (float)analogRead(analogPin[i]) / 1024 * 5; // read the input pin
-    TcpStringData=String(i + 1)+String(voltageAtAdcPin,4);
-    client.println(TcpStringData);
-    client.flush();
-
-    delay(DELAYTIME);
-  }
-  tempData = ReadBME280TempData();
-  TcpStringData="E" +String(tempData);//+".00";
+  TcpStringData="T1" +String(dig_T1)+".00";
   client.println(TcpStringData);
   client.flush();
-
   delay(DELAYTIME);
-
-  humidityData = ReadBME280HumidityData();//+".00";
-  TcpStringData="U" +String(humidityData);//+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-
+}
+void SendCompensationData()
+{
   ReadAllHumidityCompRegister();
   ReadDigT1TempCompRegister();
   ReadAllTempCompRegister();
   // use serial port console to see what is printed
-  TcpStringData="T1" +String(dig_T1)+".00";
-  client.println(TcpStringData);
-  client.flush();
+  SendCompensationT1();
   
   delay(DELAYTIME);
 
@@ -331,6 +325,37 @@ void loop()
   client.println(TcpStringData);
   client.flush();
   delay(DELAYTIME);
+}
+
+void loop()
+{
+  String  TcpStringData;
+  // send the Gas Sensor ADC value to the SerialPort
+  for (i = 0; i < 6; i++)
+  {
+    voltageAtAdcPin = (float)analogRead(analogPin[i]) / 1024 * 5; // read the input pin
+    TcpStringData=String(i + 1)+String(voltageAtAdcPin,4);
+    client.println(TcpStringData);
+    client.flush();
+
+    delay(DELAYTIME);
+  }
+  // this is the temparature data
+  tempData = ReadBME280TempData();
+  TcpStringData="E" +String(tempData);//+".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+  // 
+  humidityData = ReadBME280HumidityData();//+".00";
+  TcpStringData="U" +String(humidityData);//+".00";
+  client.println(TcpStringData);
+  client.flush();
+
+  delay(DELAYTIME);
+
+
 
 
 
