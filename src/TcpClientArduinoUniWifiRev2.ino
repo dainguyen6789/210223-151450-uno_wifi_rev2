@@ -46,7 +46,7 @@ signed short dig_H2, dig_H4, dig_H5;
 char dig_H6;
 String  TcpStringData;
 
-void SetupTCP()
+void SetupTcpConnection()
 {
   Serial.begin(115200);
   Serial.println("Attempting to connect to WPA network...");
@@ -70,6 +70,26 @@ void SetupTCP()
     {
       Serial.println("connected");
     }
+  }
+}
+void TestWiFiConnection()
+//test if always connected
+{
+  int StatusWiFi=WiFi.status();
+  if(StatusWiFi==WL_CONNECTION_LOST || StatusWiFi==WL_DISCONNECTED || StatusWiFi==WL_SCAN_COMPLETED) //if no connection
+  {
+      WiFiReconnect(); //if my SSID is present, connect
+  }
+}
+
+void WiFiReconnect()
+//connect to my SSID
+{
+ status= WL_IDLE_STATUS;
+ while(status!=WL_CONNECTED)
+ {
+   status = WiFi.begin(ssid,pass);
+   delay(500);
   }
 }
 
@@ -252,107 +272,59 @@ void ReadAllTempCompRegister()
   dig_T3 = (dataHi << 8) | dataLo;
 }
 
-void setup()
+void  SendCompensationDataByTCP(String registerID, unsigned short dataToSend)
 {
-  //Serial.begin(9600);           //  setup serial
-  ConfigAnalogPins();
-  InitBme280I2c();
-  SetupTCP();
-  SendCompensationData();
-}
-void SendCompensationT1()
-{
-  TcpStringData="T1" +String(dig_T1)+".00";
+  TcpStringData= registerID + String(dataToSend)+".00";
   client.println(TcpStringData);
   client.flush();
   delay(DELAYTIME);
 }
-void SendCompensationT2()
-{
-  TcpStringData="T2" +String(dig_T2)+".00";
-  client.println(TcpStringData);
-  client.flush();
 
-  delay(DELAYTIME);
-}
-void SendCompensationT3()
+void  SendCompensationDataByTCP(String registerID, signed short dataToSend)
 {
-  TcpStringData="T3" +String(dig_T3)+".00";
+  TcpStringData= registerID + String(dataToSend)+".00";
   client.println(TcpStringData);
   client.flush();
+  delay(DELAYTIME);
+}
 
-  delay(DELAYTIME);
-}
-void SendCompensationH1()
+void  SendCompensationDataByTCP(String registerID, char dataToSend)
 {
-  TcpStringData="H1" +String(dig_H1);".00";
+  TcpStringData= registerID + String(dataToSend)+".00";
   client.println(TcpStringData);
   client.flush();
+  delay(DELAYTIME);
+}
 
-  delay(DELAYTIME);
-}
-void SendCompensationH2()
+void  SendCompensationDataByTCP(String registerID, unsigned char dataToSend)
 {
-  TcpStringData="H2" +String(dig_H2)+".00";
+  TcpStringData= registerID + String(dataToSend)+".00";
   client.println(TcpStringData);
   client.flush();
   delay(DELAYTIME);
 }
-void SendCompensationH3()
-{
-  TcpStringData="H3" +String((unsigned short)dig_H3);//+".00";
-  client.println(TcpStringData);
-  client.flush();
 
-  delay(DELAYTIME);
-}
-void SendCompensationH4()
-{
-  TcpStringData="H4" +String(dig_H4)+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-}
-void SendCompensationH5()
-{
-  TcpStringData="H5" +String(dig_H5)+".00";
-  client.println(TcpStringData);
-  client.flush();
-
-  delay(DELAYTIME);
-}
-void SendCompensationH6()
-{
-  TcpStringData="H6"+String((float)dig_H6);
-  client.println(TcpStringData);
-  client.flush();
-  delay(DELAYTIME);
-}
-void SendCompensationData()
+void SendAllCompensationData()
 {
   ReadAllHumidityCompRegister();
   ReadDigT1TempCompRegister();
   ReadAllTempCompRegister();
-
   // use serial port console to see what is printed
   // Send the Humidity Data and its compensation the the SerialPort
   // Compensation algorithm, Page 26:
   // https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf
   // unsigned char dig_H1,dig_H3;
   // signed short dig_H2,dig_H4,dig_H5;  
-  SendCompensationT1();
-  SendCompensationT2();
-  SendCompensationT3();
-
-  SendCompensationH1();
-  SendCompensationH2();
-  SendCompensationH3();
-  SendCompensationH4();
-  SendCompensationH5();
-  SendCompensationH6();  
+  SendCompensationDataByTCP("T1",dig_T1);
+  SendCompensationDataByTCP("T2",dig_T2);
+  SendCompensationDataByTCP("T3",dig_T3);
+  SendCompensationDataByTCP("H1",dig_H1);
+  SendCompensationDataByTCP("H2",dig_H2);
+  SendCompensationDataByTCP("H3",dig_H3);
+  SendCompensationDataByTCP("H4",dig_H4);
+  SendCompensationDataByTCP("H5",dig_H5);
+  SendCompensationDataByTCP("H6",dig_H6);
 }
-
 void SendADCData()
 {
   for (i = 0; i < 6; i++)
@@ -364,10 +336,19 @@ void SendADCData()
     delay(DELAYTIME);
   }
 }
-
+void setup()
+{
+  //Serial.begin(9600);           
+  ConfigAnalogPins();
+  InitBme280I2c();
+  SetupTcpConnection();
+  SendCompensationData();
+}
 void loop()
 {
   // send the Gas Sensor ADC value to the SerialPort
+  TestWiFiConnection();
+  
   SendADCData();
   // this is the temparature data
   tempData = ReadBME280TempData();
@@ -382,5 +363,5 @@ void loop()
   client.flush();
   delay(DELAYTIME);
 
-  SendCompensationData();
+  SendAllCompensationData();
 }
