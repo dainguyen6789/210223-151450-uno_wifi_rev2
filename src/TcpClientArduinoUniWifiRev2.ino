@@ -87,9 +87,9 @@ void WiFiReconnect()
 {
  status= WL_IDLE_STATUS;
  while(status!=WL_CONNECTED)
- {
-   status = WiFi.begin(ssid,pass);
-   delay(500);
+  {
+    status = WiFi.begin(ssid,pass);
+    delay(500);
   }
 }
 
@@ -348,7 +348,7 @@ void loop()
 {
   // send the Gas Sensor ADC value to the SerialPort
   TestWiFiConnection();
-  
+
   SendADCData();
   // this is the temparature data
   tempData = ReadBME280TempData();
