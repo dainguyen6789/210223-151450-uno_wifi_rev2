@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <BME280.h>
-#define DELAYTIME 500
+#define DELAYTIME 100
 
 
 #define WIFI_OFFICE
@@ -19,7 +19,9 @@ IPAddress server(192, 168, 2,206);
 #ifdef WIFI_OFFICE
 char ssid[] = "Office" ;                         //  your network SSID (name)
 char pass[] = "erasure hunter mangle hydrated" ;//     your network password
-IPAddress server(192, 168, 11,166); 
+//IPAddress server(192, 168, 11,166); 
+IPAddress server(192, 168, 11,184); 
+
 #endif
 int status = WL_IDLE_STATUS;
 
@@ -43,7 +45,7 @@ signed short dig_T2, dig_T3;
 // humidity compensation data
 unsigned char dig_H1, dig_H3;
 signed short dig_H2, dig_H4, dig_H5;
-char dig_H6;
+unsigned char dig_H6;
 String  TcpStringData;
 
 void SetupTcpConnection()
@@ -304,6 +306,7 @@ void  SendCompensationDataByTCP(String registerID, unsigned char dataToSend)
   delay(DELAYTIME);
 }
 
+
 void SendAllCompensationData()
 {
   ReadAllHumidityCompRegister();
@@ -318,12 +321,14 @@ void SendAllCompensationData()
   SendCompensationDataByTCP("T1",dig_T1);
   SendCompensationDataByTCP("T2",dig_T2);
   SendCompensationDataByTCP("T3",dig_T3);
+
   SendCompensationDataByTCP("H1",dig_H1);
   SendCompensationDataByTCP("H2",dig_H2);
   SendCompensationDataByTCP("H3",dig_H3);
   SendCompensationDataByTCP("H4",dig_H4);
   SendCompensationDataByTCP("H5",dig_H5);
   SendCompensationDataByTCP("H6",dig_H6);
+
 }
 void SendADCData()
 {
@@ -342,26 +347,25 @@ void setup()
   ConfigAnalogPins();
   InitBme280I2c();
   SetupTcpConnection();
-  SendCompensationData();
+  //SendAllCompensationData();
+  //SendCompensationDataByTCP();
 }
 void loop()
 {
   // send the Gas Sensor ADC value to the SerialPort
-  TestWiFiConnection();
-
+  //TestWiFiConnection();
   SendADCData();
   // this is the temparature data
   tempData = ReadBME280TempData();
-  TcpStringData="E" +String(tempData);//+".00";
+  TcpStringData="E" +String(tempData)+".00";
   client.println(TcpStringData);
   client.flush();
   delay(DELAYTIME);
   
   humidityData = ReadBME280HumidityData();//+".00";
-  TcpStringData="U" +String(humidityData);//+".00";
+  TcpStringData="U" +String(humidityData)+".00";
   client.println(TcpStringData);
   client.flush();
   delay(DELAYTIME);
-
   SendAllCompensationData();
 }
