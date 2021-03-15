@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <BME280.h>
-#define DELAYTIME 100
+#define DELAYTIME 500
 
 
 #define WIFI_OFFICE
@@ -19,8 +19,8 @@ IPAddress server(192, 168, 2,206);
 #ifdef WIFI_OFFICE
 char ssid[] = "Office" ;                         //  your network SSID (name)
 char pass[] = "erasure hunter mangle hydrated" ;//     your network password
-//IPAddress server(192, 168, 11,166); 
-IPAddress server(192, 168, 11,184); 
+IPAddress server(192, 168, 11,166); 
+//IPAddress server(192, 168, 11,184); 
 
 #endif
 int status = WL_IDLE_STATUS;
@@ -353,7 +353,7 @@ void setup()
 void loop()
 {
   // send the Gas Sensor ADC value to the SerialPort
-  //TestWiFiConnection();
+  TestWiFiConnection();
   SendADCData();
   // this is the temparature data
   tempData = ReadBME280TempData();
