@@ -51,28 +51,28 @@ String  TcpStringData;
 void SetupTcpConnection()
 {
   Serial.begin(115200);
-  Serial.println("Attempting to connect to WPA network...");
-  Serial.print("SSID: ");
-  Serial.println(ssid);
+  // Serial.println("Attempting to connect to WPA network...");
+  // Serial.print("SSID: ");
+  // Serial.println(ssid);
 
-  status = WiFi.begin(ssid, pass);
-  if (status != WL_CONNECTED)
-  {
-    Serial.println("Couldn't get a wifi connection");
-    // don't do anything else:
-    while (true)
-      ;
-  }
-  else
-  {
-    Serial.println("Connected to wifi");
-    Serial.println("\nStarting connection...");
-    // if you get a connection, report back via serial:
-    if (client.connect(server, 80))
-    {
-      Serial.println("connected");
-    }
-  }
+  // status = WiFi.begin(ssid, pass);
+  // if (status != WL_CONNECTED)
+  // {
+  //   Serial.println("Couldn't get a wifi connection");
+  //   // don't do anything else:
+  //   while (true)
+  //     ;
+  // }
+  // else
+  // {
+  //   Serial.println("Connected to wifi");
+  //   Serial.println("\nStarting connection...");
+  //   // if you get a connection, report back via serial:
+  //   if (client.connect(server, 80))
+  //   {
+  //     Serial.println("connected");
+  //   }
+  // }
 }
 void TestWiFiConnection()
 //test if always connected
@@ -277,32 +277,32 @@ void ReadAllTempCompRegister()
 void  SendCompensationDataByTCP(String registerID, unsigned short dataToSend)
 {
   TcpStringData= registerID + String(dataToSend)+".00";
-  client.println(TcpStringData);
-  client.flush();
+  Serial.println(TcpStringData);
+  Serial.flush();
   delay(DELAYTIME);
 }
 
 void  SendCompensationDataByTCP(String registerID, signed short dataToSend)
 {
   TcpStringData= registerID + String(dataToSend)+".00";
-  client.println(TcpStringData);
-  client.flush();
+  Serial.println(TcpStringData);
+  Serial.flush();
   delay(DELAYTIME);
 }
 
 void  SendCompensationDataByTCP(String registerID, char dataToSend)
 {
   TcpStringData= registerID + String(dataToSend)+".00";
-  client.println(TcpStringData);
-  client.flush();
+  Serial.println(TcpStringData);
+  Serial.flush();
   delay(DELAYTIME);
 }
 
 void  SendCompensationDataByTCP(String registerID, unsigned char dataToSend)
 {
   TcpStringData= registerID + String(dataToSend)+".00";
-  client.println(TcpStringData);
-  client.flush();
+  Serial.println(TcpStringData);
+  Serial.flush();
   delay(DELAYTIME);
 }
 
@@ -336,36 +336,36 @@ void SendADCData()
   {
     voltageAtAdcPin = (float)analogRead(analogPin[i]) / 1024 * 5; // read the input pin
     TcpStringData=String(i + 1)+String(voltageAtAdcPin,4);
-    client.println(TcpStringData);
-    client.flush();
+    Serial.println(TcpStringData);
+    //Serial.flush();
     delay(DELAYTIME);
   }
 }
 void setup()
 {
-  //Serial.begin(9600);           
+  Serial.begin(115200);           
   ConfigAnalogPins();
   InitBme280I2c();
-  SetupTcpConnection();
+  // SetupTcpConnection();
   //SendAllCompensationData();
   //SendCompensationDataByTCP();
 }
 void loop()
 {
   // send the Gas Sensor ADC value to the SerialPort
-  TestWiFiConnection();
+  //TestWiFiConnection();
   SendADCData();
   // this is the temparature data
   tempData = ReadBME280TempData();
   TcpStringData="E" +String(tempData)+".00";
-  client.println(TcpStringData);
-  client.flush();
+  Serial.println(TcpStringData);
+  //Serial.flush();
   delay(DELAYTIME);
   
   humidityData = ReadBME280HumidityData();//+".00";
   TcpStringData="U" +String(humidityData)+".00";
-  client.println(TcpStringData);
-  client.flush();
+  Serial.println(TcpStringData);
+  // Serial.flush();
   delay(DELAYTIME);
   SendAllCompensationData();
 }
